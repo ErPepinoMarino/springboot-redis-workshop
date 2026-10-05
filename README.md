@@ -20,7 +20,13 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 
 ## Estado actual
 
-Proyecto **en construcción**. Hoy solo existe el esqueleto: backend con `GET /healthz`, frontend Next.js vacío y Postgres + Redis definidos en `compose.yaml`. Los módulos se irán añadiendo uno a uno.
+Proyecto **en construcción**. Módulo 0 (fundación) cerrado; Módulo 1 (caché) en marcha:
+
+- Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** (Spring Cache) cableados.
+- Endpoint `GET /cache/products/{id}`: lee productos de Postgres con **caché *cache-aside*** en Redis (TTL 60 s).
+- Tests de integración contra **Postgres y Redis reales** (Testcontainers): **8 verdes**.
+- Pendiente del módulo: invalidación (`DELETE /cache/products/{id}`) y medición de *hit ratio* / latencia.
+- Frontend Next.js todavía vacío. Los módulos se irán añadiendo uno a uno.
 
 ## Stack
 

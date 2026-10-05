@@ -34,12 +34,17 @@
 		</dependency>
 		<!-- Migraciones de base de datos -->
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+		<!-- Redis: Spring Data Redis + cliente Lettuce + autoconfiguración -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 		<!-- Driver JDBC de Postgres -->
 		<dependency>
@@ -62,6 +67,11 @@
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers-junit-jupiter</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<!-- Caché: abstracción de Spring + autoconfiguración del CacheManager -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 		</dependencies>
 	<build>
