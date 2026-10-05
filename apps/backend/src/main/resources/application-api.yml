@@ -1,3 +1,15 @@
 # Perfil `api`: expone HTTP en el puerto 8000.
 server:
   port: 8000
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/redis_workshop
+    username: redisworkshop
+    password: redisworkshop
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
