@@ -1,5 +1,6 @@
 package com.redisworkshop.products;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -16,4 +17,9 @@ public class ProductService {
         public Product findById(Long id) {
             return repository.findById(id).orElse(null);
         }
+        
+    @CacheEvict("products")
+    public void evict(Long id) {
+    }
+
 }

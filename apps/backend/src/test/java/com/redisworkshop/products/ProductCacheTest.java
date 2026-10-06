@@ -48,4 +48,14 @@ class ProductCacheTest {
         assertThat(second).isNotNull();
         assertThat(second.getName()).isEqualTo("Producto cacheado");
     }
+
+    @Test
+    void invalidaLaEntradaDeCache() {
+        service.findById(1L);
+        assertThat(redis.hasKey("products::1")).isTrue();//este ultimo .isTrue es nuestro protector contra condiciones de carrera.
+
+        service.evict(1L);
+
+        assertThat(redis.hasKey("products::1")).isFalse();
+    }
 }

@@ -23,9 +23,9 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 Proyecto **en construcción**. Módulo 0 (fundación) cerrado; Módulo 1 (caché) en marcha:
 
 - Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** (Spring Cache) cableados.
-- Endpoint `GET /cache/products/{id}`: lee productos de Postgres con **caché *cache-aside*** en Redis (TTL 60 s).
-- Tests de integración contra **Postgres y Redis reales** (Testcontainers): **8 verdes**.
-- Pendiente del módulo: invalidación (`DELETE /cache/products/{id}`) y medición de *hit ratio* / latencia.
+- Endpoints: `GET /cache/products/{id}` (lectura con **caché *cache-aside***, TTL 60 s) y `DELETE /cache/products/{id}` (**invalidación** de la caché).
+- Tests de integración contra **Postgres y Redis reales** (Testcontainers): **9 verdes**.
+- Pendiente del módulo: medición de *hit ratio* / latencia (responder a "¿cuándo compensa?").
 - Frontend Next.js todavía vacío. Los módulos se irán añadiendo uno a uno.
 
 ## Stack

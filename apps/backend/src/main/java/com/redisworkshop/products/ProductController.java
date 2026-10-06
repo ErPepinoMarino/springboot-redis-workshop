@@ -1,6 +1,7 @@
 package com.redisworkshop.products;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,5 +21,11 @@ public class ProductController {
     public ResponseEntity<Product> getById(@PathVariable Long id) {
         Product product = service.findById(id);
         return (product != null) ? ResponseEntity.ok(product) : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> evict(@PathVariable Long id) {
+        service.evict(id);
+        return ResponseEntity.noContent().build();
     }
 }
