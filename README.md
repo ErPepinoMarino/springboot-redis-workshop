@@ -23,9 +23,10 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 Proyecto **en construcción**. Módulo 0 (fundación) cerrado; Módulo 1 (caché) en marcha:
 
 - Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** (Spring Cache) cableados.
-- Endpoints: `GET /cache/products/{id}` (lectura con **caché *cache-aside***, TTL 60 s) y `DELETE /cache/products/{id}` (**invalidación** de la caché).
-- Tests de integración contra **Postgres y Redis reales** (Testcontainers): **9 verdes**.
-- Pendiente del módulo: medición de *hit ratio* / latencia (responder a "¿cuándo compensa?").
+- Endpoints: `GET /cache/products/{id}` (lectura con **caché *cache-aside***, TTL 60 s; `?cached=false` para leer **sin** caché) y `DELETE /cache/products/{id}` (**invalidación** de la caché).
+- Métricas: `/actuator/metrics/cache.gets` (hits/misses, de donde sale el ***hit ratio***) y `/actuator/health`.
+- Tests de integración contra **Postgres y Redis reales** (Testcontainers): **13 verdes**.
+- Pendiente del módulo: página de frontend que muestre el *hit ratio* y la latencia en vivo (Módulo 8).
 - Frontend Next.js todavía vacío. Los módulos se irán añadiendo uno a uno.
 
 ## Stack

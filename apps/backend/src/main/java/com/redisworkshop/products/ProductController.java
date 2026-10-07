@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,8 +19,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getById(@PathVariable Long id) {
-        Product product = service.findById(id);
+    public ResponseEntity<Product> getById(@PathVariable Long id, @RequestParam(defaultValue = "true") boolean cached) {
+        Product product = cached ? service.findById(id) : service.findByIdNoCache(id);
         return (product != null) ? ResponseEntity.ok(product) : ResponseEntity.notFound().build();
     }
 

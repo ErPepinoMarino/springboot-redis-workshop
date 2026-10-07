@@ -15,5 +15,13 @@ spring:
     enabled: true
   cache:
     type: redis
+    cache-names: products
     redis:
       time-to-live: 60s
+      enable-statistics: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics

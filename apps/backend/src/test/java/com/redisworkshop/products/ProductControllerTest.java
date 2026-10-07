@@ -34,4 +34,10 @@ class ProductControllerTest {
         mockMvc.perform(get("/cache/products/9999"))
                 .andExpect(status().isNotFound());
     }
+     @Test
+    void sinCacheDevuelveElProducto() throws Exception {
+        mockMvc.perform(get("/cache/products/1").param("cached", "false"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Teclado mecánico"));
+    }
 }
