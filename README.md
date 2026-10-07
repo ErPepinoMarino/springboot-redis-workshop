@@ -20,14 +20,13 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 
 ## Estado actual
 
-Proyecto **en construcción**. Módulo 0 (fundación) cerrado; Módulo 1 (caché) en marcha:
+Proyecto **en construcción**, full-stack por módulo. **Módulo 0 (fundación)** y **Módulo 1 (caché)** cerrados:
 
 - Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** (Spring Cache) cableados.
-- Endpoints: `GET /cache/products/{id}` (lectura con **caché *cache-aside***, TTL 60 s; `?cached=false` para leer **sin** caché) y `DELETE /cache/products/{id}` (**invalidación** de la caché).
-- Métricas: `/actuator/metrics/cache.gets` (hits/misses, de donde sale el ***hit ratio***) y `/actuator/health`.
-- Tests de integración contra **Postgres y Redis reales** (Testcontainers): **13 verdes**.
-- Pendiente del módulo: página de frontend que muestre el *hit ratio* y la latencia en vivo (Módulo 8).
-- Frontend Next.js todavía vacío. Los módulos se irán añadiendo uno a uno.
+- Endpoints de caché: `GET /cache/products/{id}` (lectura con **caché *cache-aside***, TTL 60 s; `?cached=false` para leer **sin** caché), `DELETE /cache/products/{id}` (invalidar una entrada) y `GET /cache/products/bench` (benchmark de concurrencia).
+- Métricas: `/actuator/metrics/cache.gets` (hits/misses → ***hit ratio***) y `/actuator/health`.
+- Frontend (**Next.js**): página `/cache` con un **benchmark** (N peticiones, C concurrentes) que compara *sin caché* vs *con caché*, más un dashboard y navegación.
+- Tests backend contra **Postgres y Redis reales** (Testcontainers): **16 verdes**.
 
 ## Stack
 

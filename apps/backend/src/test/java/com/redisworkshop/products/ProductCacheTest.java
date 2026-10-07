@@ -58,4 +58,16 @@ class ProductCacheTest {
 
         assertThat(redis.hasKey("products::1")).isFalse();
     }
+      @Test
+    void limpiaTodaLaCache() {
+        service.findById(1L);
+        service.findById(2L);
+        assertThat(redis.hasKey("products::1")).isTrue();
+        assertThat(redis.hasKey("products::2")).isTrue();
+
+        service.clear();
+
+        assertThat(redis.hasKey("products::1")).isFalse();
+        assertThat(redis.hasKey("products::2")).isFalse();
+    }
 }
