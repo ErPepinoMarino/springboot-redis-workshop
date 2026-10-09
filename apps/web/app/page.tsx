@@ -10,8 +10,9 @@ const modules = [
   },
   {
     title: "Rate limiting",
-    description: "Contadores atómicos y scripts Lua para limitar peticiones.",
-    ready: false,
+    description: "Token bucket atómico con Redis (Lua): límite, cola y 429.",
+    href: "/ratelimit",
+    ready: true,
   },
   {
     title: "Leaderboard",

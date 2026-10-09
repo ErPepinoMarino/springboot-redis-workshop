@@ -20,13 +20,13 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 
 ## Estado actual
 
-Proyecto **en construcción**, full-stack por módulo. **Módulo 0 (fundación)** y **Módulo 1 (caché)** cerrados:
+Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulo 0 (fundación)**, **Módulo 1 (caché)** y **Módulo 2 (rate limiting)**.
 
-- Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** (Spring Cache) cableados.
-- Endpoints de caché: `GET /cache/products/{id}` (lectura con **caché *cache-aside***, TTL 60 s; `?cached=false` para leer **sin** caché), `DELETE /cache/products/{id}` (invalidar una entrada) y `GET /cache/products/bench` (benchmark de concurrencia).
-- Métricas: `/actuator/metrics/cache.gets` (hits/misses → ***hit ratio***) y `/actuator/health`.
-- Frontend (**Next.js**): página `/cache` con un **benchmark** (N peticiones, C concurrentes) que compara *sin caché* vs *con caché*, más un dashboard y navegación.
-- Tests backend contra **Postgres y Redis reales** (Testcontainers): **16 verdes**.
+- Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** cableados; Actuator (`/actuator/health`, `/actuator/metrics`).
+- **Módulo 1 — Caché**: `GET`/`DELETE /cache/products/{id}`, `?cached=false`, `GET /cache/products/bench` (benchmark de concurrencia), *cache-aside* con Redis y TTL 60 s.
+- **Módulo 2 — Rate limiting**: **token bucket** atómico en **Redis + Lua**; `GET /ratelimit/ping` limitado por IP (`429` + `Retry-After` + `X-RateLimit-*`) y `GET /ratelimit/simulate` (modelo de simulación: pasa/cola/descartadas + ritmo de servicio).
+- Frontend (**Next.js**): páginas `/cache` (benchmark) y `/ratelimit` (simulación + endpoint real), más dashboard y navegación.
+- Tests backend contra **Postgres y Redis reales** (Testcontainers): **24 verdes**.
 
 ## Stack
 

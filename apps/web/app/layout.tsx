@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 const modules = [
   { href: "/cache", label: "Caché", ready: true },
-  { label: "Rate limiting", ready: false },
+  { href: "/ratelimit", label: "Rate limiting", ready: true },
   { label: "Leaderboard", ready: false },
   { label: "Sesiones", ready: false },
   { label: "Cola de trabajos", ready: false },
