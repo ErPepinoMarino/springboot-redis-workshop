@@ -20,13 +20,14 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 
 ## Estado actual
 
-Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulo 0 (fundación)**, **Módulo 1 (caché)** y **Módulo 2 (rate limiting)**.
+Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulo 0 (fundación)**, **Módulo 1 (caché)**, **Módulo 2 (rate limiting)** y **Módulo 3 (leaderboard)**.
 
 - Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** cableados; Actuator (`/actuator/health`, `/actuator/metrics`).
 - **Módulo 1 — Caché**: `GET`/`DELETE /cache/products/{id}`, `?cached=false`, `GET /cache/products/bench` (benchmark de concurrencia), *cache-aside* con Redis y TTL 60 s.
 - **Módulo 2 — Rate limiting**: **token bucket** atómico en **Redis + Lua**; `GET /ratelimit/ping` limitado por IP (`429` + `Retry-After` + `X-RateLimit-*`) y `GET /ratelimit/simulate` (modelo de simulación: pasa/cola/descartadas + ritmo de servicio).
-- Frontend (**Next.js**): páginas `/cache` (benchmark) y `/ratelimit` (simulación + endpoint real), más dashboard y navegación.
-- Tests backend contra **Postgres y Redis reales** (Testcontainers): **24 verdes**.
+- **Módulo 3 — Leaderboard**: **test de carga** con *sorted sets* de Redis (`ZINCRBY`) vs Postgres (`UPDATE` en transacción): `POST /leaderboard/benchmark` mide las **operaciones completadas por segundo** bajo concurrencia (Redis escala; Postgres se techa en su pool).
+- Frontend (**Next.js**): páginas `/cache`, `/ratelimit` y `/leaderboard`, más dashboard y navegación.
+- Tests backend contra **Postgres y Redis reales** (Testcontainers): **25 verdes**.
 
 ## Stack
 

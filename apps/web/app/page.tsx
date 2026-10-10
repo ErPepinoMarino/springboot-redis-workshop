@@ -17,7 +17,8 @@ const modules = [
   {
     title: "Leaderboard",
     description: "Rankings en tiempo real con sorted sets.",
-    ready: false,
+    href: "/leaderboard",
+    ready: true,
   },
   {
     title: "Sesiones",

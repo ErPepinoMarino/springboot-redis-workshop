@@ -1,0 +1,1 @@
+CREATE INDEX idx_player_scores_score ON player_scores (score);
