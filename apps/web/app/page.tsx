@@ -23,7 +23,8 @@ const modules = [
   {
     title: "Sesiones",
     description: "Login con sesiones en Redis (hashes + TTL).",
-    ready: false,
+    href: "/sessions",
+    ready: true,
   },
   {
     title: "Cola de trabajos",

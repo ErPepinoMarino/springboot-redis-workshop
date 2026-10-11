@@ -22,7 +22,7 @@ const modules = [
   { href: "/cache", label: "Caché", ready: true },
   { href: "/ratelimit", label: "Rate limiting", ready: true },
   { href: "/leaderboard", label: "Leaderboard", ready: true },
-  { label: "Sesiones", ready: false },
+  { href: "/sessions", label: "Sesiones", ready: true },
   { label: "Cola de trabajos", ready: false },
   { label: "Pub/Sub", ready: false },
   { label: "Lock distribuido", ready: false },
