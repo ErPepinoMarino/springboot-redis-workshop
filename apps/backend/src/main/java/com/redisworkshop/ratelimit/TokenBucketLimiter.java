@@ -14,6 +14,10 @@ public class TokenBucketLimiter {
     private static final String KEY_PREFIX = "ipCliente:";
 
     private final StringRedisTemplate redis;
+    //El SuppressWarnings es porque la clase DefaultRedisScript es generica,
+    // y no se puede crear un array de objetos genericos en Java.
+    // Podriamos usar un string cifrando los valores allowed, remaining... pero seria una movida.
+    @SuppressWarnings("rawtypes")
     private final DefaultRedisScript<List> script;
 
     public TokenBucketLimiter(StringRedisTemplate redis) {

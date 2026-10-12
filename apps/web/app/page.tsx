@@ -28,8 +28,9 @@ const modules = [
   },
   {
     title: "Cola de trabajos",
-    description: "Encolar y procesar trabajo en background con listas.",
-    ready: false,
+    description: "Encolar y procesar trabajo en background con streams y workers.",
+    href: "/jobs",
+    ready: true,
   },
   {
     title: "Pub/Sub",

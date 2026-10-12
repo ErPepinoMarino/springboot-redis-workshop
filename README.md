@@ -14,21 +14,22 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 | **Rate limiting** | contadores + Lua | atomicidad, filtros, `429` |
 | **Leaderboard** | *sorted sets* | rankings en tiempo real |
 | **Sesiones** | hashes + TTL | login, expiración |
-| **Cola de trabajos** | listas / Streams | trabajo en background |
+| **Cola de trabajos** | Streams + consumer groups | trabajo en background, ack, rescate |
 | **Pub/Sub** | canales | notificaciones en vivo (SSE) |
 | **Lock distribuido** | `SET NX PX` | exclusión mutua entre procesos |
 
 ## Estado actual
 
-Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–4** (fundación, caché, rate limiting, leaderboard, sesiones).
+Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–5** (fundación, caché, rate limiting, leaderboard, sesiones, cola de trabajos).
 
 - Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** cableados; Actuator (`/actuator/health`, `/actuator/metrics`).
 - **Módulo 1 — Caché**: `GET`/`DELETE /cache/products/{id}`, `?cached=false`, `GET /cache/products/bench` (benchmark de concurrencia), *cache-aside* con Redis y TTL 60 s.
 - **Módulo 2 — Rate limiting**: **token bucket** atómico en **Redis + Lua**; `GET /ratelimit/ping` limitado por IP (`429` + `Retry-After` + `X-RateLimit-*`) y `GET /ratelimit/simulate` (modelo de simulación: pasa/cola/descartadas + ritmo de servicio).
 - **Módulo 3 — Leaderboard**: **test de carga** con *sorted sets* de Redis (`ZINCRBY`) vs Postgres (`UPDATE` en transacción): `POST /leaderboard/benchmark` mide las **operaciones completadas por segundo** bajo concurrencia (Redis escala; Postgres se techa en su pool).
 - **Módulo 4 — Sesiones**: login con la sesión en **Redis** (*hash* + **TTL**, token en cookie `HttpOnly`); `POST /sessions/login`, `GET /sessions/me`, `POST /sessions/logout`; contadores con **acceso por rol** (`401`/`403`). Contraseñas con **BCrypt**.
-- Frontend (**Next.js**): páginas `/cache`, `/ratelimit`, `/leaderboard` y `/sessions`, más dashboard y navegación.
-- Tests backend contra **Postgres y Redis reales** (Testcontainers): **32 verdes**.
+- **Módulo 5 — Cola de trabajos**: *job queue* con **Redis Streams** + **consumer group** (`XREADGROUP`/`XACK`); `POST /jobs` (encola y responde al instante) y `GET /jobs/{id}` (estado); **3 workers** procesan con un **handler** por tipo; **reclaim** (`XPENDING` + `XCLAIM`) rescata los huérfanos; estados `PENDING`/`PROCESSING`/`ORPHANED`/`DONE`/`FAILED`.
+- Frontend (**Next.js**): páginas `/cache`, `/ratelimit`, `/leaderboard`, `/sessions` y `/jobs`, más dashboard y navegación.
+- Tests backend contra **Postgres y Redis reales** (Testcontainers): **37 verdes**.
 
 ## Stack
 

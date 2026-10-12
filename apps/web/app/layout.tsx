@@ -23,7 +23,7 @@ const modules = [
   { href: "/ratelimit", label: "Rate limiting", ready: true },
   { href: "/leaderboard", label: "Leaderboard", ready: true },
   { href: "/sessions", label: "Sesiones", ready: true },
-  { label: "Cola de trabajos", ready: false },
+  { href: "/jobs", label: "Cola de trabajos", ready: true },
   { label: "Pub/Sub", ready: false },
   { label: "Lock distribuido", ready: false },
 ];
