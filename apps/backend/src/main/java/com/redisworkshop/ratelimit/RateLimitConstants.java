@@ -12,6 +12,13 @@ public final class RateLimitConstants {
     public static final int MAX_RATE = 100_000;
     public static final int MAX_QUEUE = 1_000_000;
 
+    // --- Pub/Sub + SSE de la simulación ---
+    public static final String CHANNEL = "ratelimit";
+    public static final String SERVED_PLAIN_KEY = "ratelimit:served:plain";
+    public static final String SERVED_BUCKET_KEY = "ratelimit:served:bucket";
+    public static final long TICK_MS = 250;
+    public static final int INITIAL_ZERO_TICKS = 2; //Para que no empiece a saco.
+
     private RateLimitConstants() {
     }
 }

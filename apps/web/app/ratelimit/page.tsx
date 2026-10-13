@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { API_BASE, apiFetch } from "@/lib/api";
+import { LiveChart, type LivePoint } from "./LiveChart";
 
 type Point = { seconds: number; remaining: number };
 type Simulation = {
@@ -197,6 +198,11 @@ export default function RateLimitPage() {
   const cancelRef = useRef(false);
   const rafRef = useRef<number | null>(null);
 
+  //Para el sse
+  const [livePoints, setLivePoints] = useState<LivePoint[]>([]);
+  const [liveRunning, setLiveRunning] = useState(false);
+  const liveRef = useRef<EventSource | null>(null);
+
   const busy = phase === "loading" || phase === "playing";
 
   async function simulate() {
@@ -269,6 +275,46 @@ export default function RateLimitPage() {
     }
     setReal({ ok, tooMany, remaining, retryAfter });
     setRealRunning(false);
+  }
+  useEffect(() => {
+    return () => liveRef.current?.close();
+  }, []);
+
+  function startLive() {
+    liveRef.current?.close();
+    setLivePoints([]);
+    setLiveRunning(true);
+
+    const source = new EventSource(`${API_BASE}/ratelimit/stream`);
+    source.onmessage = (event) => {
+      const tick = JSON.parse(event.data) as { plain: number; bucket: number };
+      setLivePoints((prev) => [...prev, { plain: tick.plain, bucket: tick.bucket }]);
+    };
+    liveRef.current = source;
+
+    void apiFetch(
+      `/ratelimit/simulate/stream?requests=${requests}&capacity=${capacity}&rate=${rate}&queue=${queue}`,
+      { method: "POST" }
+    );
+
+    source.onmessage = (event) => {
+      const tick = JSON.parse(event.data) as {
+        plain?: number;
+        bucket?: number;
+        done?: boolean;
+      };
+      if (tick.done) {
+        stopLive();
+        return;
+      }
+      setLivePoints((prev) => [...prev, { plain: tick.plain ?? 0, bucket: tick.bucket ?? 0 }]);
+    };
+  }
+
+  function stopLive() {
+    liveRef.current?.close();
+    liveRef.current = null;
+    setLiveRunning(false);
   }
   const simLimit = sim ? sim.capacity + sim.queue : 0;
   return (
@@ -439,14 +485,32 @@ export default function RateLimitPage() {
           </table>
         )}
       </section>
-
+      <section className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+        <h2 className="font-medium">Simulación en vivo (SSE)</h2>
+        <p className="text-sm text-black/60 dark:text-white/60">
+          Cada tick (0.25s) llega del backend por <strong>Redis Pub/Sub</strong> +{" "}
+          <strong>SSE</strong>. Cada punto son las peticiones{" "}
+          <strong>atendidas en ese intervalo</strong>.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button className={greenButton} disabled={liveRunning} onClick={startLive}>
+            Simular en vivo
+          </button>
+          <button
+            className="rounded-md border border-black/20 px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 disabled:opacity-40 dark:border-white/20 dark:hover:bg-white/10"
+            disabled={!liveRunning}
+            onClick={stopLive}
+          >
+            Parar
+          </button>
+        </div>
+        <LiveChart points={livePoints} maxY={Math.min(requests, capacity + queue)} />
+      </section>
       <footer className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-black/60 dark:text-white/60">
-        ⚠️ <strong>Modelo didáctico, no observación real.</strong> Esta simulación es una{" "}
-        <strong>predicción</strong> (matemáticas), y la animación es una reproducción del cálculo,
-        no tiempo real. El endpoint real <strong>rechaza con 429 y no encola</strong>, así que aquí
-        no hay una cola real que medir. La visualización <strong>real</strong> (estado observado en
-        vivo, vía <strong>SSE</strong>) se implementará en el <strong>Módulo 6</strong>. Además,
-        todas las peticiones de la demo comparten IP (la del proxy de Next).
+        ⚠️ <strong>Modelo didáctico.</strong> La simulación de arriba es una{" "}
+        <strong>predicción</strong> (matemáticas). La sección <strong>en vivo (SSE)</strong> sí
+        refleja los <strong>ticks reales</strong> que publica el backend. El endpoint real{" "}
+        <strong>rechaza con 429 y no encola</strong>.
       </footer>
     </div>
   );

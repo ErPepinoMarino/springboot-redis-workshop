@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.redisworkshop.sse.SseRegistry;
+
 import java.time.Instant;
 import java.util.Map;
 
@@ -24,8 +26,8 @@ public class ClockController {
         return Map.of("time", Instant.now().toString());
     }
 
-    @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream() {
-        return registry.register();
+     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    SseEmitter stream() {
+        return registry.register(PubSubConstants.CLOCK_CHANNEL);
     }
 }
