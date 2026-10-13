@@ -15,12 +15,12 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 | **Leaderboard** | *sorted sets* | rankings en tiempo real |
 | **Sesiones** | hashes + TTL | login, expiración |
 | **Cola de trabajos** | Streams + consumer groups | trabajo en background, ack, rescate |
-| **Pub/Sub** | canales | notificaciones en vivo (SSE) |
+| **Pub/Sub** | canales + SSE | eventos en vivo (reloj) |
 | **Lock distribuido** | `SET NX PX` | exclusión mutua entre procesos |
 
 ## Estado actual
 
-Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–5** (fundación, caché, rate limiting, leaderboard, sesiones, cola de trabajos).
+Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–6** (fundación, caché, rate limiting, leaderboard, sesiones, cola de trabajos, pub/sub).
 
 - Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** cableados; Actuator (`/actuator/health`, `/actuator/metrics`).
 - **Módulo 1 — Caché**: `GET`/`DELETE /cache/products/{id}`, `?cached=false`, `GET /cache/products/bench` (benchmark de concurrencia), *cache-aside* con Redis y TTL 60 s.
@@ -28,8 +28,9 @@ Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–
 - **Módulo 3 — Leaderboard**: **test de carga** con *sorted sets* de Redis (`ZINCRBY`) vs Postgres (`UPDATE` en transacción): `POST /leaderboard/benchmark` mide las **operaciones completadas por segundo** bajo concurrencia (Redis escala; Postgres se techa en su pool).
 - **Módulo 4 — Sesiones**: login con la sesión en **Redis** (*hash* + **TTL**, token en cookie `HttpOnly`); `POST /sessions/login`, `GET /sessions/me`, `POST /sessions/logout`; contadores con **acceso por rol** (`401`/`403`). Contraseñas con **BCrypt**.
 - **Módulo 5 — Cola de trabajos**: *job queue* con **Redis Streams** + **consumer group** (`XREADGROUP`/`XACK`); `POST /jobs` (encola y responde al instante) y `GET /jobs/{id}` (estado); **3 workers** procesan con un **handler** por tipo; **reclaim** (`XPENDING` + `XCLAIM`) rescata los huérfanos; estados `PENDING`/`PROCESSING`/`ORPHANED`/`DONE`/`FAILED`.
-- Frontend (**Next.js**): páginas `/cache`, `/ratelimit`, `/leaderboard`, `/sessions` y `/jobs`, más dashboard y navegación.
-- Tests backend contra **Postgres y Redis reales** (Testcontainers): **37 verdes**.
+- **Módulo 6 — Pub/Sub**: **reloj en vivo** con **canales** de Redis (`PUBLISH`/`SUBSCRIBE`) + **SSE** (`text/event-stream`); `GET /clock` (preguntar la hora) y `GET /clock/stream` (el servidor la empuja cada 0.5 s); `SseRegistry` con *fan-out* y limpieza al desconectar. Página `/pubsub` con dos paneles (preguntar vs empujar).
+- Frontend (**Next.js**): páginas `/cache`, `/ratelimit`, `/leaderboard`, `/sessions`, `/jobs` y `/pubsub`, más dashboard y navegación.
+- Tests backend contra **Postgres y Redis reales** (Testcontainers): **38 verdes**.
 
 ## Stack
 
