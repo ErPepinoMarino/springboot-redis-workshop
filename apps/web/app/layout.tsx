@@ -24,7 +24,7 @@ const modules = [
   { href: "/leaderboard", label: "Leaderboard", ready: true },
   { href: "/sessions", label: "Sesiones", ready: true },
   { href: "/jobs", label: "Cola de trabajos", ready: true },
-  { label: "Pub/Sub", ready: false },
+  { href: "/pubsub", label: "Pub/Sub", ready: true },
   { label: "Lock distribuido", ready: false },
 ];
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -35,7 +35,8 @@ const modules = [
   {
     title: "Pub/Sub",
     description: "Notificaciones en vivo con canales y SSE.",
-    ready: false,
+    href: "/pubsub",
+    ready: true,
   },
   {
     title: "Lock distribuido",

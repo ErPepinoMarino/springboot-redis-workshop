@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  //Con compress: false evitamos el buffering que impide
+  //que el ejemplo del reloj con sse se congele.
+  //no es lo primera vez que me pasa. Maldito next.js.
+  compress: false,
   async rewrites() {
     return [
       {
