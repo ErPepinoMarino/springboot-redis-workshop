@@ -29,19 +29,16 @@ const TYPES: { value: JobType; label: string }[] = [
 ];
 
 const statusColor: Record<JobStatus, string> = {
-  PENDING: "text-black/50 dark:text-white/50",
+  PENDING: "text-dim",
   PROCESSING: "text-amber-600 dark:text-amber-400",
   ORPHANED: "text-purple-600 dark:text-purple-400",
   DONE: "text-emerald-600 dark:text-emerald-400",
   FAILED: "text-red-600 dark:text-red-400",
 };
 
-const greenButton =
-  "rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed";
-const neutralButton =
-  "rounded-md border border-black/20 px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 disabled:opacity-40 dark:border-white/20 dark:hover:bg-white/10";
-const inputClass =
-  "rounded-md border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent";
+const greenButton = "btn btn-primary";
+const neutralButton = "btn btn-ghost";
+const inputClass = "input";
 
 const typeLabel = (type: JobType) => TYPES.find((t) => t.value === type)?.label ?? type;
 
@@ -136,9 +133,9 @@ export default function JobsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold">Cola de trabajos</h1>
-        <p className="max-w-3xl text-sm text-black/60 dark:text-white/60">
+      <section className="flex flex-col items-center gap-2 text-center">
+        <h1 className="font-display text-3xl tracking-wide text-cyan">Cola de trabajos</h1>
+        <p className="max-w-3xl text-sm text-dim">
           Encola tareas y deja que <strong>3 workers</strong> las procesen en paralelo desde un{" "}
           <strong>stream</strong> de Redis (<code>XREADGROUP</code> + <code>XACK</code>). Cada tarea
           se procesa en un <strong>handler</strong>. La tarea «caída» no confirma (<em>sin ack</em>)
@@ -147,9 +144,9 @@ export default function JobsPage() {
         </p>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <section className="flex flex-col gap-3 rounded-sm border border-line p-4 border-line">
         <h2 className="font-medium">1. Elige una tarea y añádela a la lista</h2>
-        <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap items-end justify-center gap-3">
           <label className="flex flex-col gap-1 text-sm">
             Tipo de tarea
             <select
@@ -175,22 +172,22 @@ export default function JobsPage() {
           >
             Añadir a la lista
           </button>
-          <span className="text-sm text-black/50 dark:text-white/50">
+          <span className="text-sm text-dim">
             {queue.length}/{MAX_TASKS}
           </span>
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <section className="flex flex-col gap-3 rounded-sm border border-line p-4 border-line">
         <h2 className="font-medium">2. Lanza las tareas</h2>
         {queue.length === 0 ? (
-          <p className="text-sm text-black/50 dark:text-white/50">La lista está vacía.</p>
+          <p className="text-sm text-dim">La lista está vacía.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {queue.map((item, index) => (
               <li
                 key={item.localId}
-                className="flex items-center justify-between gap-3 rounded-md border border-black/10 px-3 py-2 text-sm dark:border-white/10"
+                className="flex items-center justify-between gap-3 rounded-sm border border-line px-3 py-2 text-sm border-line"
               >
                 <span>
                   Tarea {index + 1} · {typeLabel(item.type)}
@@ -205,7 +202,7 @@ export default function JobsPage() {
             ))}
           </ul>
         )}
-        <div className="flex gap-3">
+        <div className="flex justify-center gap-3">
           <button className={greenButton} disabled={busy || queue.length === 0} onClick={launch}>
             {busy ? "Lanzando..." : `Lanzar tareas (${queue.length})`}
           </button>
@@ -219,21 +216,21 @@ export default function JobsPage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <section className="flex flex-col gap-3 rounded-sm border border-line p-4 border-line">
         <h2 className="font-medium">
           3. Resultados{" "}
           {tracking && (
-            <span className="text-xs text-black/40 dark:text-white/40">(trackeando…)</span>
+            <span className="text-xs text-dim">(trackeando…)</span>
           )}
         </h2>
         {jobs.length === 0 ? (
-          <p className="text-sm text-black/50 dark:text-white/50">Aún no has lanzado tareas.</p>
+          <p className="text-sm text-dim">Aún no has lanzado tareas.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {jobs.map((j, index) => (
               <li
                 key={j.localId}
-                className="flex items-center justify-between gap-3 rounded-md border border-black/10 px-3 py-2 text-sm dark:border-white/10"
+                className="flex items-center justify-between gap-3 rounded-sm border border-line px-3 py-2 text-sm border-line"
               >
                 <span>
                   Tarea {index + 1} · {typeLabel(j.job.type)}
@@ -245,7 +242,7 @@ export default function JobsPage() {
         )}
       </section>
 
-      <footer className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-black/60 dark:text-white/60">
+      <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
         ⚠️ El estado se refresca con <strong>polling</strong> cada 0.5s. En el{" "}
         <strong>Módulo 6</strong> lo cambiaremos por <strong>SSE</strong> para recibir cada cambio
         al instante. La tarea «caída» no hace <code>XACK</code>: queda pendiente y el reclaimer la

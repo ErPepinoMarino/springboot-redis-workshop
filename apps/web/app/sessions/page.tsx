@@ -6,12 +6,9 @@ import { API_BASE, apiFetch } from "@/lib/api";
 type SessionUser = { username: string; role: string };
 type Counters = { public: number; authenticated: number; admin: number };
 
-const greenButton =
-  "rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed";
-const neutralButton =
-  "rounded-md border border-black/20 px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 disabled:opacity-40 dark:border-white/20 dark:hover:bg-white/10";
-const inputClass =
-  "w-40 rounded-md border border-black/20 px-3 py-2 dark:border-white/20 dark:bg-transparent";
+const greenButton = "btn btn-primary";
+const neutralButton = "btn btn-ghost";
+const inputClass = "input";
 
 export default function SessionsPage() {
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -117,38 +114,38 @@ export default function SessionsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold">Sesiones</h1>
-        <p className="max-w-3xl text-sm text-black/60 dark:text-white/60">
+      <section className="flex flex-col items-center gap-2 text-center">
+        <h1 className="font-display text-3xl tracking-wide text-cyan">Sesiones</h1>
+        <p className="max-w-3xl text-sm text-dim">
           Login con la sesión guardada en <strong>Redis</strong> (hash + TTL). Tres contadores con
           distinto nivel de acceso: <strong>público</strong>, <strong>autenticado</strong> y{" "}
           <strong>super usuario</strong>. La sesión caduca sola (TTL).
         </p>
       </section>
 
-      <section className="rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <section className="rounded-sm border border-line p-4 border-line">
         {user ? (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm">
               Conectado como <strong>{user.username}</strong>{" "}
-              <span className="text-black/50 dark:text-white/50">({user.role})</span>
+              <span className="text-dim">({user.role})</span>
             </p>
             <button className={neutralButton} disabled={busy} onClick={logout}>
               Cerrar sesión
             </button>
-            <div className="flex items-center gap-3 rounded-md border border-black/10 p-3 dark:border-white/10">
+            <div className="flex items-center gap-3 rounded-sm border border-line p-3 border-line">
               <span className="text-sm">TTL de la sesión:</span>
-              <span className="text-2xl font-semibold tabular-nums">
+              <span className="font-display text-3xl tracking-wide text-cyan tabular-nums">
                 {ttlMs === null ? "—" : `${(ttlMs / 1000).toFixed(1)}s`}
               </span>
             </div>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-black/60 dark:text-white/60">
+            <p className="text-sm text-dim">
               Inicia sesión con tus credenciales o usa los accesos rápidos (credenciales públicas).
             </p>
-            <div className="flex flex-wrap items-end gap-3">
+            <div className="flex flex-wrap items-end justify-center gap-3">
               <label className="flex flex-col gap-1 text-sm">
                 Usuario
                 <input
@@ -174,7 +171,7 @@ export default function SessionsPage() {
                 Iniciar sesión
               </button>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               <button
                 className={neutralButton}
                 disabled={busy}
@@ -207,10 +204,10 @@ export default function SessionsPage() {
         {counterDefs.map((c) => (
           <div
             key={c.key}
-            className="flex flex-col gap-2 rounded-lg border border-black/10 p-4 dark:border-white/10"
+            className="flex flex-col gap-2 rounded-sm border border-line p-4 border-line"
           >
             <h2 className="font-medium">{c.title}</h2>
-            <p className="text-xs text-black/50 dark:text-white/50">{c.hint}</p>
+            <p className="text-xs text-dim">{c.hint}</p>
             <div className="text-3xl font-semibold">{counters[c.key]}</div>
             <button
               className={greenButton}
@@ -224,7 +221,7 @@ export default function SessionsPage() {
         ))}
       </section>
 
-      <footer className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-black/60 dark:text-white/60">
+      <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
         ⚠️ El bloqueo del botón es solo <strong>UX</strong>; el servidor <strong>siempre</strong>{" "}
         verifica (401/403) en cada clic. Credenciales de ejemplo: <code>user/user</code> y{" "}
         <code>admin/admin</code>. El <strong>contador regresivo SSE</strong> del TTL llegará en el

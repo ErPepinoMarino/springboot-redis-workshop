@@ -14,10 +14,8 @@ const CLIENTS = [
 
 const label = (id: string) => CLIENTS.find((c) => c.id === id)?.label ?? id;
 
-const greenButton =
-  "rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed";
-const neutralButton =
-  "rounded-md border border-black/20 px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 disabled:opacity-40 dark:border-white/20 dark:hover:bg-white/10";
+const greenButton = "btn btn-primary";
+const neutralButton = "btn btn-ghost";
 
 function Humanoid({ hasKey }: { hasKey: boolean }) {
   return (
@@ -98,8 +96,8 @@ export default function LockPage() {
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-semibold">Lock distribuido</h1>
-        <p className="max-w-3xl text-sm text-black/60 dark:text-white/60">
+        <h1 className="font-display text-3xl tracking-wide text-cyan">Lock distribuido</h1>
+        <p className="max-w-3xl text-sm text-dim">
           Un <strong>lock en Redis</strong> (<code>SET NX PX</code>) da acceso exclusivo a un
           recurso compartido. <strong>Pepe, Juan y Luis</strong> compiten por{" "}
           <strong>una llave</strong>: solo el que la tiene puede accionar el contador. Se libera al
@@ -107,8 +105,8 @@ export default function LockPage() {
         </p>
       </section>
 
-      <section className="flex flex-col items-center gap-1 rounded-lg border border-black/10 p-6 dark:border-white/10">
-        <span className="text-sm text-black/50 dark:text-white/50">Contador</span>
+      <section className="flex flex-col items-center gap-1 rounded-sm border border-line p-6 border-line">
+        <span className="text-sm text-dim">Contador</span>
         <span className="text-5xl font-semibold tabular-nums">{counter}</span>
         <span className="text-lg font-medium tabular-nums">
           {holder ? `🔑 ${label(holder)} · ${(ttlMs / 1000).toFixed(1)}s` : "llave libre"}
@@ -121,8 +119,8 @@ export default function LockPage() {
           return (
             <div
               key={c.id}
-              className={`flex flex-col items-center gap-3 rounded-lg border p-4 transition-colors ${
-                owns ? "border-amber-500/60 bg-amber-500/5" : "border-black/10 dark:border-white/10"
+              className={`flex flex-col items-center gap-3 rounded-sm border p-4 transition-colors ${
+                owns ? "border-amber-500/60 bg-amber-500/5" : "border-line"
               }`}
             >
               <span className="text-center font-medium">{c.label}</span>
@@ -151,7 +149,7 @@ export default function LockPage() {
         })}
       </section>
 
-      <section className="flex flex-col items-center gap-2 rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <section className="flex flex-col items-center gap-2 rounded-sm border border-line p-4 border-line">
         <div className="flex w-full items-center justify-between">
           <h2 className="font-medium">Consola</h2>
           <button className={neutralButton} onClick={() => setLog([])}>
@@ -160,10 +158,10 @@ export default function LockPage() {
         </div>
         <div
           ref={consoleRef}
-          className="h-40 w-full overflow-y-auto rounded-md bg-black/5 p-3 text-center font-mono text-xs dark:bg-white/5"
+          className="h-40 w-full overflow-y-auto rounded-sm bg-black/5 p-3 text-center font-mono text-xs dark:bg-white/5"
         >
           {log.length === 0 ? (
-            <p className="text-black/40 dark:text-white/40">Sin acciones todavía…</p>
+            <p className="text-dim">Sin acciones todavía…</p>
           ) : (
             log.map((line, i) => <p key={i}>{line}</p>)
           )}

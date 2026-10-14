@@ -1,26 +1,237 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Modo oscuro SIEMPRE (clase en <html>), no por preferencia del SO. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bg: #04070a;
+  --color-panel: #080e13;
+  --color-line: #123040;
+  --color-cyan: #22d3ee;
+  --color-green: #4ade80;
+  --color-neon-cyan: #00fff0;
+  --color-neon-green: #00ff88;
+  --color-dim: #5f7f8c;
+  --color-text: #bfe6ef;
+
+  --font-display: var(--font-vt323), "Courier New", monospace;
+  --font-mono: var(--font-share-tech), "Courier New", monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    color-scheme: dark;
+    scrollbar-color: var(--color-line) transparent;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    background-image:
+      linear-gradient(rgba(34, 211, 238, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 211, 238, 0.045) 1px, transparent 1px);
+    background-size: 34px 34px;
+    background-attachment: fixed;
+  }
+
+  /* Banda que recorre el fondo (detrás del contenido, delante de la rejilla). */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 255, 240, 0.03) 40%,
+      rgba(0, 255, 240, 0.09) 50%,
+      rgba(0, 255, 240, 0.03) 60%,
+      transparent 100%
+    );
+    background-size: 100% 26vh;
+    background-repeat: no-repeat;
+    animation: scanline 11s linear infinite;
+  }
+
+  ::selection {
+    background: var(--color-neon-cyan);
+    color: #001014;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border-radius: 0;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-cyan);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* --- Superficies --- */
+  .panel {
+    @apply rounded-sm border border-line bg-panel/80 p-4;
+  }
+  .panel-title {
+    @apply mb-2 font-display text-xl tracking-wide text-cyan;
+  }
+
+  /* --- Botones --- */
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center rounded-sm border px-3 py-2 text-sm font-medium tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply border-green/60 bg-green/10 text-green hover:border-green hover:bg-green/20 hover:text-neon-green;
+  }
+  .btn-ghost {
+    @apply border-line text-dim hover:border-cyan hover:text-cyan;
+  }
+  .btn-danger {
+    @apply border-red-500/50 text-red-400 hover:border-red-400 hover:bg-red-500/10;
+  }
+
+  /* --- Inputs --- */
+  .input {
+    @apply rounded-sm border border-line bg-black/40 px-3 py-2 text-sm text-text outline-none focus:border-cyan focus:ring-1 focus:ring-cyan/40;
+  }
+
+  /* --- Chips / etiquetas --- */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-sm border border-line px-2 py-0.5 text-xs text-dim;
+  }
+
+  /* --- Separador ASCII --- */
+  .divider {
+    @apply select-none overflow-hidden whitespace-nowrap font-mono text-xs text-line;
+  }
+
+  /* --- Texto --- */
+  .muted {
+    @apply text-dim;
+  }
+  .glow-cyan {
+    text-shadow:
+      0 0 4px rgba(0, 255, 240, 0.55),
+      0 0 14px rgba(0, 255, 240, 0.25);
+  }
+  .glow-green {
+    text-shadow:
+      0 0 4px rgba(0, 255, 136, 0.55),
+      0 0 14px rgba(0, 255, 136, 0.25);
+  }
+
+  /* --- Glitch (CSS puro, barato) --- */
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+  .glitch::before {
+    color: var(--color-neon-cyan);
+    animation: glitch-x 2.2s steps(2, end) infinite;
+  }
+  .glitch::after {
+    color: var(--color-neon-green);
+    animation: glitch-y 1.7s steps(2, end) infinite;
+  }
+}
+
+@keyframes glitch-x {
+  0%,
+  70%,
+  100% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  71% {
+    transform: translate(-4px, 0);
+    clip-path: inset(10% 0 60% 0);
+  }
+  74% {
+    transform: translate(4px, 0);
+    clip-path: inset(50% 0 20% 0);
+  }
+  77% {
+    transform: translate(-3px, 0);
+    clip-path: inset(30% 0 40% 0);
+  }
+  80% {
+    transform: translate(3px, 0);
+    clip-path: inset(70% 0 5% 0);
+  }
+  83% {
+    transform: translate(-2px, 0);
+    clip-path: inset(5% 0 80% 0);
+  }
+}
+
+@keyframes glitch-y {
+  0%,
+  65%,
+  100% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  67% {
+    transform: translate(4px, 2px);
+    clip-path: inset(40% 0 30% 0);
+  }
+  70% {
+    transform: translate(-4px, -2px);
+    clip-path: inset(20% 0 50% 0);
+  }
+  74% {
+    transform: translate(3px, 1px);
+    clip-path: inset(60% 0 15% 0);
+  }
+  78% {
+    transform: translate(-3px, -1px);
+    clip-path: inset(15% 0 65% 0);
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.4;
+  }
+  98% {
+    opacity: 1;
+  }
+  99% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes scanline {
+  0% {
+    background-position: 0 -26vh;
+  }
+  100% {
+    background-position: 0 126vh;
+  }
 }

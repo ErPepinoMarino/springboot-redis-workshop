@@ -1,66 +1,65 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { VT323, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const vt323 = VT323({
+  weight: "400",
+  variable: "--font-vt323",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const shareTechMono = Share_Tech_Mono({
+  weight: "400",
+  variable: "--font-share-tech",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Spring Boot + Redis Workshop",
+  title: "Spring Boot / Redis Workshop",
   description: "Taller didáctico de Spring Boot y Redis",
 };
 
 const modules = [
-  { href: "/cache", label: "Caché", ready: true },
-  { href: "/ratelimit", label: "Rate limiting", ready: true },
-  { href: "/leaderboard", label: "Leaderboard", ready: true },
-  { href: "/sessions", label: "Sesiones", ready: true },
-  { href: "/jobs", label: "Cola de trabajos", ready: true },
-  { href: "/pubsub", label: "Pub/Sub", ready: true },
-  { href: "/lock", label: "Lock distribuido", ready: true },
+  { href: "/cache", label: "Caché" },
+  { href: "/ratelimit", label: "Rate limiting" },
+  { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/sessions", label: "Sesiones" },
+  { href: "/jobs", label: "Cola de trabajos" },
+  { href: "/pubsub", label: "Pub/Sub" },
+  { href: "/lock", label: "Lock distribuido" },
 ];
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <header className="border-b border-black/10 dark:border-white/10">
-          <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-6 py-4">
-            <Link href="/" className="font-semibold">
-              Spring Boot + Redis
+    <html lang="es" className={`dark ${vt323.variable} ${shareTechMono.variable}`}>
+      <body className="flex min-h-full flex-col">
+        <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
+          <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-2 px-6 py-3">
+            <Link
+              href="/"
+              className="glow-cyan mr-2 font-display text-2xl tracking-wider text-cyan"
+            >
+              ~/springboot-redis
             </Link>
-            <span className="text-black/20 dark:text-white/20">|</span>
-            {modules.map((m) =>
-              m.ready && m.href ? (
-                <Link
-                  key={m.label}
-                  href={m.href}
-                  className="text-sm text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-                >
-                  {m.label}
-                </Link>
-              ) : (
-                <span
-                  key={m.label}
-                  title="Próximamente"
-                  className="text-sm text-black/25 dark:text-white/25"
-                >
-                  {m.label}
-                </span>
-              )
-            )}
+            {modules.map((m) => (
+              <Link
+                key={m.href}
+                href={m.href}
+                className="rounded-sm border border-line px-3 py-1 text-sm text-dim transition-colors hover:border-cyan hover:text-cyan"
+              >
+                {m.label}
+              </Link>
+            ))}
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</main>
-        <footer className="border-t border-black/10 px-6 py-4 text-center text-xs text-black/40 dark:border-white/10 dark:text-white/40">
-          Taller didáctico — Redis / Spring Boot
+        <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-6 py-8">
+          {children}
+        </main>
+        <footer className="relative z-10 border-t border-line px-6 py-4 text-center text-xs text-dim">
+          <span className="font-display tracking-[0.2em]">
+            [ SPRING BOOT + REDIS — TALLER DIDÁCTICO ]
+          </span>
         </footer>
       </body>
     </html>

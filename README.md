@@ -1,69 +1,105 @@
 # springboot-redis-workshop
 
-**Taller didáctico de Spring Boot + Redis.** Una colección de mini-módulos independientes (caché, rate limiting, leaderboards, colas, pub/sub, locks...) para aprender ambas tecnologías construyendo, probando y trasteando desde un frontend.
+🌐 **English** · [Español](README.es.md)
 
-> **Objetivo:** aprender Spring Boot y Redis. El proyecto es la excusa; entender cada línea es el resultado.
+<p align="center">
+  <img src="docs/images/00_Hero.jpg" width="520" alt="Spring Boot / Redis Workshop">
+</p>
 
-## Módulos
+**A hands-on workshop for learning Spring Boot + Redis.** A collection of independent mini-modules
+(cache, rate limiting, leaderboard, job queue, pub/sub, distributed lock...) to learn both
+technologies by building, testing and poking at them from a frontend.
 
-Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página en el frontend.
+> **Goal:** learn Spring Boot and Redis. The project is the excuse; understanding every line is the
+> result.
 
-| Módulo | Patrón de Redis | Qué enseña |
-|---|---|---|
-| **Caché** | *cache-aside* sobre Postgres | `@Cacheable`, TTL, invalidación, *hit ratio* |
-| **Rate limiting** | contadores + Lua | atomicidad, filtros, `429` |
-| **Leaderboard** | *sorted sets* | rankings en tiempo real |
-| **Sesiones** | hashes + TTL | login, expiración |
-| **Cola de trabajos** | Streams + consumer groups | trabajo en background, ack, rescate |
-| **Pub/Sub** | canales + SSE | eventos en vivo (reloj) |
-| **Lock distribuido** | `SET NX PX` | exclusión mutua entre procesos |
+## Modules
 
-## Estado actual
+Each module demonstrates a Redis pattern and ships its own API, its tests and its frontend page.
 
-Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–7** (fundación, caché, rate limiting, leaderboard, sesiones, cola de trabajos, pub/sub, lock distribuido).
+### 1 — Cache
 
-- Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** cableados; Actuator (`/actuator/health`, `/actuator/metrics`).
-- **Módulo 1 — Caché**: `GET`/`DELETE /cache/products/{id}`, `?cached=false`, `GET /cache/products/bench` (benchmark de concurrencia), *cache-aside* con Redis y TTL 60 s.
-- **Módulo 2 — Rate limiting**: **token bucket** atómico en **Redis + Lua**; `GET /ratelimit/ping` limitado por IP (`429` + `Retry-After` + `X-RateLimit-*`) y `GET /ratelimit/simulate` (modelo: pasa/cola/descartadas). **Visualización en vivo (SSE)**: `POST /ratelimit/simulate/stream` + `GET /ratelimit/stream` (ticks cada 0.25 s con las atendidas sin/con bucket).
-- **Módulo 3 — Leaderboard**: **test de carga** con *sorted sets* de Redis (`ZINCRBY`) vs Postgres (`UPDATE` en transacción): `POST /leaderboard/benchmark` mide las **operaciones completadas por segundo** bajo concurrencia (Redis escala; Postgres se techa en su pool).
-- **Módulo 4 — Sesiones**: login con la sesión en **Redis** (*hash* + **TTL**, token en cookie `HttpOnly`); `POST /sessions/login`, `GET /sessions/me`, `POST /sessions/logout`; contadores con **acceso por rol** (`401`/`403`). Contraseñas con **BCrypt**. **TTL en vivo (SSE)**: `GET /sessions/ttl/stream` → contador regresivo que caduca solo.
-- **Módulo 5 — Cola de trabajos**: *job queue* con **Redis Streams** + **consumer group** (`XREADGROUP`/`XACK`); `POST /jobs` (encola y responde al instante) y `GET /jobs/{id}` (estado); **3 workers** procesan con un **handler** por tipo; **reclaim** (`XPENDING` + `XCLAIM`) rescata los huérfanos; estados `PENDING`/`PROCESSING`/`ORPHANED`/`DONE`/`FAILED`.
-- **Módulo 6 — Pub/Sub**: **reloj en vivo** con **canales** de Redis (`PUBLISH`/`SUBSCRIBE`) + **SSE** (`text/event-stream`); `GET /clock` (preguntar la hora) y `GET /clock/stream` (el servidor la empuja cada 0.5 s). `SseRegistry` **por topic** con *fan-out* y limpieza al desconectar. Página `/pubsub` (dos paneles: preguntar vs empujar). Integra además: **rate limiting en vivo** (Módulo 2, gráfico de líneas sin/con bucket) y **TTL de sesiones en vivo** (Módulo 4, contador regresivo 1-a-1 sin *fan-out*).
-- **Módulo 7 — Lock distribuido**: **exclusión mutua** con **Redis** (`SET NX PX` + liberación con **token** vía **Lua**); `POST /lock/acquire`, `POST /lock/release`, `POST /lock/counter/increment` (solo con la llave) y `GET /lock/stream` (SSE: `{holder, ttlMs}`). **TTL 10 s** (liberación automática si el dueño "se cae"). Página `/lock` (Pepe, Juan y Luis compiten por una llave).
-- Frontend (**Next.js**): páginas `/cache`, `/ratelimit`, `/leaderboard`, `/sessions`, `/jobs`, `/pubsub` y `/lock`, más dashboard y navegación.
-- Tests backend contra **Postgres y Redis reales** (Testcontainers): **43 verdes**.
+<p align="center"><img src="docs/images/01_Cache.jpg" width="420" alt="Cache"></p>
+
+We show the speed difference when reading random products from a list, **with and without cache**.
+We fire a number of requests at different concurrency levels, set up several scenarios and compare
+the results.
+
+### 2 — Rate limiting
+
+<p align="center"><img src="docs/images/02_Rate_Limiting.jpg" width="420" alt="Rate limiting"></p>
+
+A **token bucket** limits how many requests an endpoint accepts per IP. We see how the bucket
+refills over time, when it answers `429`, and how it spreads the load instead of letting it all
+through at once.
+
+### 3 — Leaderboard
+
+<p align="center"><img src="docs/images/03_Leaderboard.jpg" width="420" alt="Leaderboard"></p>
+
+We compare how fast a ranking updates with a Redis **sorted set** versus doing it with Postgres
+`UPDATE`s, under heavy concurrency. We measure operations per second.
+
+### 4 — Sessions
+
+<p align="center"><img src="docs/images/04_Sessions.jpg" width="420" alt="Sessions"></p>
+
+Login with the session stored in **Redis** (hash + TTL) and the token in an `HttpOnly` cookie. We
+see how it expires on its own, role-based access, and the TTL countdown live.
+
+### 5 — Job queue
+
+<p align="center"><img src="docs/images/05_Work_Queue.jpg" width="420" alt="Job queue"></p>
+
+We enqueue tasks and process them **in the background** with several workers, without blocking the
+request. We see the distribution, the `ack`, the retries, and the rescue of stuck tasks.
+
+### 6 — Pub/Sub
+
+<p align="center"><img src="docs/images/06_Pub_Sub.jpg" width="420" alt="Pub/Sub"></p>
+
+A **live clock**: the server publishes events to a Redis channel and pushes them to the browser with
+**SSE**. We compare asking (polling) versus the server pushing, and use it to watch rate limiting
+and session TTL in real time.
+
+### 7 — Distributed lock
+
+<p align="center"><img src="docs/images/07_Shared_Lock.jpg" width="420" alt="Distributed lock"></p>
+
+A resource only one can touch at a time. With a lock in Redis (`SET NX PX`) we manage who holds
+"the key", how they release it (only the owner), and how it frees itself if the owner dies.
 
 ## Stack
 
 - **Backend**: Java 21 + Spring Boot 4.x
 - **Frontend**: Next.js (App Router, TypeScript, Tailwind)
-- **Datos**: PostgreSQL + Redis (Docker Compose)
+- **Data**: PostgreSQL + Redis (Docker Compose)
 
-## Estructura
+## Structure
 
 ```
 apps/
-  backend/    Spring Boot — un solo proyecto con módulos por concepto
-  web/        Next.js — una página por módulo
+  backend/    Spring Boot — a single project with modules by concept
+  web/        Next.js — one page per module
 compose.yaml  Postgres + Redis
 ```
 
-> `docs/PLAN.md` es una nota de trabajo local (no versionada).
+> `docs/PLAN.md` is a local working note (not versioned).
 
 ## Dev
 
-Requisitos: JDK 21, Node.js 24+, Docker.
+Requirements: JDK 21, Node.js 24+, Docker.
 
 ```bash
-# Infraestructura (Postgres + Redis)
+# Infrastructure (Postgres + Redis)
 docker compose up -d
 
-# API (desde apps/backend) → http://localhost:8000
+# API (from apps/backend) → http://localhost:8000
 ./mvnw spring-boot:run
 
-# Web (desde apps/web) → http://localhost:3000
+# Web (from apps/web) → http://localhost:3000
 npm install
 npm run dev
 ```
 
-Comprobación: `curl http://localhost:8000/healthz`
+Check: `curl http://localhost:8000/healthz`

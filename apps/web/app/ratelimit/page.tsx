@@ -33,15 +33,12 @@ const scenarios = [
 const PLAY_MS = 4000;
 const MIN_LOADING_MS = 1000;
 
-const greenButton =
-  "rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-40";
-const presetBase = "rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:opacity-40";
-const presetIdle =
-  "bg-black/5 text-black/70 hover:bg-black/10 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/15";
-const presetSelected = "bg-amber-400 text-black";
-const inputClass =
-  "w-28 rounded-md border border-black/20 px-3 py-2 dark:border-white/20 dark:bg-transparent";
-const hintClass = "text-xs text-black/40 dark:text-white/40";
+const greenButton = "btn btn-primary";
+const presetBase = "btn";
+const presetIdle = "btn-ghost";
+const presetSelected = "border-cyan bg-cyan/10 text-cyan";
+const inputClass = "input";
+const hintClass = "text-xs text-dim";
 
 function ServiceRateChart({
   limit,
@@ -116,7 +113,7 @@ function ServiceRateChart({
 
   return (
     <div className="flex flex-col gap-2">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full text-black/60 dark:text-white/60">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full text-dim">
         <line
           x1={pad}
           y1={sy(0)}
@@ -319,9 +316,9 @@ export default function RateLimitPage() {
   const simLimit = sim ? sim.capacity + sim.queue : 0;
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold">Rate limiting</h1>
-        <p className="max-w-3xl text-sm text-black/60 dark:text-white/60">
+      <section className="flex flex-col items-center gap-2 text-center">
+        <h1 className="font-display text-3xl tracking-wide text-cyan">Rate limiting</h1>
+        <p className="max-w-3xl text-sm text-dim">
           Un <strong>token bucket</strong>: caben <strong>C</strong> fichas (ráfaga) y se generan{" "}
           <strong>R</strong> por segundo. Un aluvión se reparte en <strong>pasan ya</strong>,{" "}
           <strong>en cola</strong> (esperan ficha) y <strong>descartadas</strong>. Simula y observa
@@ -330,10 +327,10 @@ export default function RateLimitPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <p className="text-sm text-black/60 dark:text-white/60">
+        <p className="text-center text-sm text-dim">
           Elige un test por defecto o ajusta los valores.
         </p>
-        <div className="flex flex-wrap items-start gap-3">
+        <div className="flex flex-wrap items-start justify-center gap-3">
           {(
             [
               ["Peticiones", requests, setRequests, "1", "1000000"],
@@ -366,7 +363,7 @@ export default function RateLimitPage() {
             bucket se calcula sumando la capacidad del bucket y la de la cola de espera ({capacity}{" "}
             + {queue} = <strong>{limit}</strong>).
           </p>
-          <div className="flex flex-wrap items-center gap-3 pt-6">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-6">
             {scenarios.map((s) => (
               <button
                 key={s.label}
@@ -382,7 +379,7 @@ export default function RateLimitPage() {
             </button>
             {busy && (
               <button
-                className="rounded-md border border-red-500/40 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400"
+                className="rounded-sm border border-red-500/40 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400"
                 onClick={cancel}
               >
                 Cancelar
@@ -393,7 +390,7 @@ export default function RateLimitPage() {
       </section>
 
       {phase === "loading" && (
-        <p className="text-sm text-black/60 dark:text-white/60">
+        <p className="text-sm text-dim">
           Lanzando test con {requests.toLocaleString()} peticiones, capacidad {capacity}, ritmo{" "}
           {rate}/s y cola {queue}…
         </p>
@@ -426,14 +423,14 @@ export default function RateLimitPage() {
             ].map((block) => (
               <div
                 key={block.title}
-                className="rounded-lg border border-black/10 p-4 dark:border-white/10"
+                className="rounded-sm border border-line p-4 border-line"
               >
                 <h3 className={`mb-2 font-semibold ${block.color}`}>{block.title}</h3>
                 <table className="w-full border-collapse text-sm">
                   <tbody>
                     {block.rows.map(([k, v]) => (
-                      <tr key={String(k)} className="border-b border-black/5 dark:border-white/5">
-                        <td className="py-1 pr-4 text-black/60 dark:text-white/60">{k}</td>
+                      <tr key={String(k)} className="border-b border-line/40 border-line/40">
+                        <td className="py-1 pr-4 text-dim">{k}</td>
                         <td>{v}</td>
                       </tr>
                     ))}
@@ -442,7 +439,7 @@ export default function RateLimitPage() {
               </div>
             ))}
           </div>
-          <div className="rounded-lg border border-black/10 p-4 dark:border-white/10">
+          <div className="rounded-sm border border-line p-4 border-line">
             <h2 className="mb-2 font-medium">Evolución de la cola</h2>
             <ServiceRateChart
               limit={simLimit}
@@ -455,9 +452,9 @@ export default function RateLimitPage() {
         </section>
       )}
 
-      <section className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <section className="flex flex-col gap-3 rounded-sm border border-line p-4 border-line">
         <h2 className="font-medium">Endpoint real</h2>
-        <p className="text-sm text-black/60 dark:text-white/60">
+        <p className="text-sm text-dim">
           Lanza 25 peticiones a <code>/ratelimit/ping</code>. El límite lo pone el servidor
           (capacidad 20, ritmo 10/s) y es por IP. Verás cuántas pasan y cuántas reciben{" "}
           <strong>429</strong> con <code>Retry-After</code>.
@@ -476,8 +473,8 @@ export default function RateLimitPage() {
                 ["X-RateLimit-Remaining", real.remaining ?? "—"],
                 ["Retry-After", real.retryAfter ?? "—"],
               ].map(([label, value]) => (
-                <tr key={label} className="border-b border-black/5 dark:border-white/5">
-                  <td className="py-1 pr-4 text-black/60 dark:text-white/60">{label}</td>
+                <tr key={label} className="border-b border-line/40 border-line/40">
+                  <td className="py-1 pr-4 text-dim">{label}</td>
                   <td>{value}</td>
                 </tr>
               ))}
@@ -485,19 +482,19 @@ export default function RateLimitPage() {
           </table>
         )}
       </section>
-      <section className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+      <section className="flex flex-col gap-3 rounded-sm border border-line p-4 border-line">
         <h2 className="font-medium">Simulación en vivo (SSE)</h2>
-        <p className="text-sm text-black/60 dark:text-white/60">
+        <p className="text-sm text-dim">
           Cada tick (0.25s) llega del backend por <strong>Redis Pub/Sub</strong> +{" "}
           <strong>SSE</strong>. Cada punto son las peticiones{" "}
           <strong>atendidas en ese intervalo</strong>.
         </p>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           <button className={greenButton} disabled={liveRunning} onClick={startLive}>
             Simular en vivo
           </button>
           <button
-            className="rounded-md border border-black/20 px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 disabled:opacity-40 dark:border-white/20 dark:hover:bg-white/10"
+            className="rounded-sm border border-line px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 disabled:opacity-40 border-line dark:hover:bg-white/10"
             disabled={!liveRunning}
             onClick={stopLive}
           >
@@ -506,7 +503,7 @@ export default function RateLimitPage() {
         </div>
         <LiveChart points={livePoints} maxY={Math.min(requests, capacity + queue)} />
       </section>
-      <footer className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-black/60 dark:text-white/60">
+      <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
         ⚠️ <strong>Modelo didáctico.</strong> La simulación de arriba es una{" "}
         <strong>predicción</strong> (matemáticas). La sección <strong>en vivo (SSE)</strong> sí
         refleja los <strong>ticks reales</strong> que publica el backend. El endpoint real{" "}

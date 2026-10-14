@@ -23,15 +23,12 @@ const scenarios = [
   { label: "Carga alta", concurrency: 100 },
 ];
 
-const greenButton =
-  "rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-40";
-const presetBase = "rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:opacity-40";
-const presetIdle =
-  "bg-black/5 text-black/70 hover:bg-black/10 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/15";
-const presetSelected = "bg-amber-400 text-black";
-const inputClass =
-  "w-32 rounded-md border border-black/20 px-3 py-2 dark:border-white/20 dark:bg-transparent";
-const hintClass = "text-xs text-black/40 dark:text-white/40";
+const greenButton = "btn btn-primary";
+const presetBase = "btn";
+const presetIdle = "btn-ghost";
+const presetSelected = "border-cyan bg-cyan/10 text-cyan";
+const inputClass = "input";
+const hintClass = "text-xs text-dim";
 
 export default function LeaderboardPage() {
   const [concurrency, setConcurrency] = useState(10);
@@ -81,9 +78,9 @@ export default function LeaderboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold">Leaderboard</h1>
-        <p className="max-w-3xl text-sm text-black/60 dark:text-white/60">
+      <section className="flex flex-col items-center gap-2 text-center">
+        <h1 className="font-display text-3xl tracking-wide text-cyan">Leaderboard</h1>
+        <p className="max-w-3xl text-sm text-dim">
           <strong>Test de carga.</strong> Lanzamos <strong>{concurrency}</strong> peticiones
           concurrentes que puntúan sin parar durante <strong>{DURATION} segundos</strong> sobre un
           ranking de <strong>{PLAYERS.toLocaleString()} jugadores</strong>. La{" "}
@@ -97,10 +94,10 @@ export default function LeaderboardPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <p className="text-sm text-black/60 dark:text-white/60">
+        <p className="text-center text-sm text-dim">
           Elige un escenario por defecto o ajusta la concurrencia.
         </p>
-        <div className="flex flex-wrap items-start gap-3">
+        <div className="flex flex-wrap items-start justify-center gap-3">
           <label className="flex flex-col gap-1 text-sm">
             Concurrencia (C)
             <input
@@ -121,7 +118,7 @@ export default function LeaderboardPage() {
             </span>
           </label>
 
-          <div className="flex flex-wrap items-center gap-3 pt-6">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-6">
             {scenarios.map((s) => (
               <button
                 key={s.label}
@@ -140,7 +137,7 @@ export default function LeaderboardPage() {
       </section>
 
       {running && (
-        <p className="text-sm text-black/60 dark:text-white/60">
+        <p className="text-sm text-dim">
           Lanzando {concurrency} peticiones concurrentes durante {DURATION} s en ambos bandos…
         </p>
       )}
@@ -150,19 +147,19 @@ export default function LeaderboardPage() {
           {sides.map((side) => (
             <div
               key={side.title}
-              className="rounded-lg border border-black/10 p-4 dark:border-white/10"
+              className="rounded-sm border border-line p-4 border-line"
             >
               <h2 className={`mb-2 font-semibold ${side.accent}`}>{side.title}</h2>
               <div className="mb-3 text-sm">
                 Éxitos: <strong>{side.successes.toLocaleString()}</strong>{" "}
-                <span className="text-black/50 dark:text-white/50">
+                <span className="text-dim">
                   (~{opsPerSecond(side.successes).toLocaleString()} ops/s)
                 </span>
               </div>
               <div className="max-h-80 overflow-auto">
                 <table className="w-full border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-black/10 text-left dark:border-white/10">
+                    <tr className="border-b border-line text-left border-line">
                       <th className="py-1 pr-3 font-medium">#</th>
                       <th className="py-1 pr-3 font-medium">Jugador</th>
                       <th className="py-1 font-medium">Puntos</th>
@@ -172,9 +169,9 @@ export default function LeaderboardPage() {
                     {side.top.map((entry, index) => (
                       <tr
                         key={entry.member}
-                        className="border-b border-black/5 dark:border-white/5"
+                        className="border-b border-line/40 border-line/40"
                       >
-                        <td className="py-1 pr-3 text-black/40 dark:text-white/40">{index + 1}</td>
+                        <td className="py-1 pr-3 text-dim">{index + 1}</td>
                         <td className="py-1 pr-3">{entry.member}</td>
                         <td className="py-1">{entry.score}</td>
                       </tr>
@@ -188,7 +185,7 @@ export default function LeaderboardPage() {
       )}
 
       {speedup !== null && result && (
-        <section className="rounded-lg border border-emerald-600/30 bg-emerald-600/5 p-4 text-sm">
+        <section className="rounded-sm border border-emerald-600/30 bg-emerald-600/5 p-4 text-sm">
           <p>
             Con C={result.concurrency}, Redis completó{" "}
             <span className="font-bold text-emerald-600 dark:text-emerald-400">
@@ -201,7 +198,7 @@ export default function LeaderboardPage() {
         </section>
       )}
 
-      <footer className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-black/60 dark:text-white/60">
+      <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
         ⚠️ <strong>Honesto y medido en backend.</strong> Cada evento es una transacción/petición, en
         ambos bandos por igual. Lo que medimos es <strong>throughput</strong> (operaciones
         completadas en {DURATION} s), no latencia de una sola. Postgres no falla, simplemente{" "}

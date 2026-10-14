@@ -3,10 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { API_BASE, apiFetch } from "@/lib/api";
 
-const greenButton =
-  "rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed";
-const neutralButton =
-  "rounded-md border border-black/20 px-3 py-2 text-sm font-medium transition-colors hover:bg-black/5 disabled:opacity-40 dark:border-white/20 dark:hover:bg-white/10";
+const greenButton = "btn btn-primary";
+const neutralButton = "btn btn-ghost";
 
 function formatTime(iso: string): string {
   const date = new Date(iso);
@@ -48,9 +46,9 @@ export default function ClockPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold">Pub/Sub + SSE</h1>
-        <p className="max-w-3xl text-sm text-black/60 dark:text-white/60">
+      <section className="flex flex-col items-center gap-2 text-center">
+        <h1 className="font-display text-3xl tracking-wide text-cyan">Pub/Sub + SSE</h1>
+        <p className="max-w-3xl text-sm text-dim">
           La hora del servidor, de dos formas: <strong>preguntando</strong> (panel 1) y{" "}
           <strong>empujada</strong> por el servidor (panel 2). Por debajo: <code>PUBLISH</code>/
           <code>SUBSCRIBE</code> en Redis y eventos <code>text/event-stream</code>.
@@ -58,7 +56,7 @@ export default function ClockPage() {
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+        <div className="flex flex-col gap-3 rounded-sm border border-line p-4 border-line">
           <h2 className="font-medium">1. Sin SSE (tú preguntas)</h2>
           <p className="text-4xl font-semibold tabular-nums">
             {manualTime ? formatTime(manualTime) : "--:--:--"}
@@ -66,13 +64,13 @@ export default function ClockPage() {
           <button className={neutralButton} onClick={refresh}>
             Actualizar
           </button>
-          <p className="text-xs text-black/50 dark:text-white/50">
+          <p className="text-xs text-dim">
             Cada clic hace <code>GET /clock</code>. La hora solo cambia cuando{" "}
             <strong>pides</strong>.
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+        <div className="flex flex-col gap-3 rounded-sm border border-line p-4 border-line">
           <h2 className="font-medium">
             2. Con SSE (el servidor empuja){" "}
             {connected && (
@@ -84,7 +82,7 @@ export default function ClockPage() {
           <p className="text-4xl font-semibold tabular-nums">
             {liveTime ? formatTime(liveTime) : "--:--:--"}
           </p>
-          <div className="flex gap-3">
+          <div className="flex justify-center gap-3">
             <button className={greenButton} disabled={connected} onClick={subscribe}>
               Suscribirse
             </button>
@@ -92,14 +90,14 @@ export default function ClockPage() {
               Desuscribirse
             </button>
           </div>
-          <p className="text-xs text-black/50 dark:text-white/50">
+          <p className="text-xs text-dim">
             <code>EventSource</code> sobre <code>/clock/stream</code>: la hora llega cada 0.5s{" "}
             <strong>sin pedirla</strong>. Al desuscribirte, se cierra la conexión.
           </p>
         </div>
       </section>
 
-      <footer className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-black/60 dark:text-white/60">
+      <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
         <strong>Cómo funciona:</strong> un <code>@Scheduled</code> publica la hora en el canal{" "}
         <code>clock</code> de Redis cada 0.5s. El backend está suscrito y, por cada mensaje, lo{" "}
         <em>empuja</em> al navegador con <strong>SSE</strong> (eventos unidireccionales
