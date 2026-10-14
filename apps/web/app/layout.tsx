@@ -25,7 +25,7 @@ const modules = [
   { href: "/sessions", label: "Sesiones", ready: true },
   { href: "/jobs", label: "Cola de trabajos", ready: true },
   { href: "/pubsub", label: "Pub/Sub", ready: true },
-  { label: "Lock distribuido", ready: false },
+  { href: "/lock", label: "Lock distribuido", ready: true },
 ];
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

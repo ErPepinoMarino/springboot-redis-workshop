@@ -20,7 +20,7 @@ Cada módulo demuestra un patrón y tiene su propia API, sus tests y su página 
 
 ## Estado actual
 
-Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–6** (fundación, caché, rate limiting, leaderboard, sesiones, cola de trabajos, pub/sub).
+Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–7** (fundación, caché, rate limiting, leaderboard, sesiones, cola de trabajos, pub/sub, lock distribuido).
 
 - Backend Spring Boot con `GET /healthz`, **Postgres** (JPA + Flyway) y **Redis** cableados; Actuator (`/actuator/health`, `/actuator/metrics`).
 - **Módulo 1 — Caché**: `GET`/`DELETE /cache/products/{id}`, `?cached=false`, `GET /cache/products/bench` (benchmark de concurrencia), *cache-aside* con Redis y TTL 60 s.
@@ -29,8 +29,9 @@ Proyecto **en construcción**, full-stack por módulo. Cerrados: **Módulos 0–
 - **Módulo 4 — Sesiones**: login con la sesión en **Redis** (*hash* + **TTL**, token en cookie `HttpOnly`); `POST /sessions/login`, `GET /sessions/me`, `POST /sessions/logout`; contadores con **acceso por rol** (`401`/`403`). Contraseñas con **BCrypt**. **TTL en vivo (SSE)**: `GET /sessions/ttl/stream` → contador regresivo que caduca solo.
 - **Módulo 5 — Cola de trabajos**: *job queue* con **Redis Streams** + **consumer group** (`XREADGROUP`/`XACK`); `POST /jobs` (encola y responde al instante) y `GET /jobs/{id}` (estado); **3 workers** procesan con un **handler** por tipo; **reclaim** (`XPENDING` + `XCLAIM`) rescata los huérfanos; estados `PENDING`/`PROCESSING`/`ORPHANED`/`DONE`/`FAILED`.
 - **Módulo 6 — Pub/Sub**: **reloj en vivo** con **canales** de Redis (`PUBLISH`/`SUBSCRIBE`) + **SSE** (`text/event-stream`); `GET /clock` (preguntar la hora) y `GET /clock/stream` (el servidor la empuja cada 0.5 s). `SseRegistry` **por topic** con *fan-out* y limpieza al desconectar. Página `/pubsub` (dos paneles: preguntar vs empujar). Integra además: **rate limiting en vivo** (Módulo 2, gráfico de líneas sin/con bucket) y **TTL de sesiones en vivo** (Módulo 4, contador regresivo 1-a-1 sin *fan-out*).
-- Frontend (**Next.js**): páginas `/cache`, `/ratelimit`, `/leaderboard`, `/sessions`, `/jobs` y `/pubsub`, más dashboard y navegación.
-- Tests backend contra **Postgres y Redis reales** (Testcontainers): **40 verdes**.
+- **Módulo 7 — Lock distribuido**: **exclusión mutua** con **Redis** (`SET NX PX` + liberación con **token** vía **Lua**); `POST /lock/acquire`, `POST /lock/release`, `POST /lock/counter/increment` (solo con la llave) y `GET /lock/stream` (SSE: `{holder, ttlMs}`). **TTL 10 s** (liberación automática si el dueño "se cae"). Página `/lock` (Pepe, Juan y Luis compiten por una llave).
+- Frontend (**Next.js**): páginas `/cache`, `/ratelimit`, `/leaderboard`, `/sessions`, `/jobs`, `/pubsub` y `/lock`, más dashboard y navegación.
+- Tests backend contra **Postgres y Redis reales** (Testcontainers): **43 verdes**.
 
 ## Stack
 

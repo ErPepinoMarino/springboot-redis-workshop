@@ -41,7 +41,8 @@ const modules = [
   {
     title: "Lock distribuido",
     description: "Exclusión mutua entre procesos con SET NX PX.",
-    ready: false,
+    href: "/lock",
+    ready: true,
   },
 ];
 
