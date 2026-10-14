@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
@@ -51,5 +52,10 @@ public class SessionService {
         byte[] bytes = new byte[32];
         RANDOM.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+    public long ttlMillis(String token) {
+        Long millis = redis.getExpire(PREFIX + token, TimeUnit.MILLISECONDS);
+        //-2 significa clave no existente
+        return millis == null ? -2 : millis;
     }
 }

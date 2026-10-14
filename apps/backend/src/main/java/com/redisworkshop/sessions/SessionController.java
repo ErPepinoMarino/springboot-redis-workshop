@@ -15,12 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/sessions")
 public class SessionController {
 
     private static final String COOKIE = "session";
+    private final SessionTtlStreamer streamer;
 
     private final UserRepository users;
     private final SessionService sessions;
@@ -28,10 +31,11 @@ public class SessionController {
     private final Duration ttl;
 
     public SessionController(UserRepository users, SessionService sessions, PasswordEncoder encoder,
-            @Value("${sessions.ttl:30s}") Duration ttl) {
+            SessionTtlStreamer streamer, @Value("${sessions.ttl:30s}") Duration ttl) {
         this.users = users;
         this.sessions = sessions;
         this.encoder = encoder;
+        this.streamer = streamer;
         this.ttl = ttl;
     }
 
@@ -55,6 +59,15 @@ public class SessionController {
         return sessions.find(token)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+    @GetMapping(path = "/ttl/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    ResponseEntity<SseEmitter> ttlStream(@CookieValue(name = COOKIE, required = false) String token) {
+        if (token == null || sessions.find(token).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        SseEmitter emitter = new SseEmitter(0L);
+        streamer.start(token, emitter);
+        return ResponseEntity.ok(emitter);
     }
 
     @PostMapping("/logout")

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { API_BASE, apiFetch } from "@/lib/api";
 
 type SessionUser = { username: string; role: string };
 type Counters = { public: number; authenticated: number; admin: number };
@@ -20,6 +20,25 @@ export default function SessionsPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [ttlMs, setTtlMs] = useState<number | null>(null);
+
+  const sessionUser = user?.username ?? null;
+
+  useEffect(() => {
+    if (!sessionUser) {
+      return;
+    }
+    const source = new EventSource(`${API_BASE}/sessions/ttl/stream`);
+    source.onmessage = (event) => {
+      const data = JSON.parse(event.data) as { ttl?: number; expired?: boolean };
+      if (data.expired) {
+        setUser(null);
+        return;
+      }
+      setTtlMs(data.ttl ?? 0);
+    };
+    return () => source.close();
+  }, [sessionUser]);
 
   const refreshMe = useCallback(async () => {
     const res = await apiFetch("/sessions/me");
@@ -55,6 +74,7 @@ export default function SessionsPage() {
     });
     if (res.ok) {
       setUser((await res.json()) as SessionUser);
+      setTtlMs(null);
       await refreshCounters();
     } else {
       setMessage("Credenciales incorrectas.");
@@ -66,6 +86,7 @@ export default function SessionsPage() {
     setBusy(true);
     await apiFetch("/sessions/logout", { method: "POST" });
     setUser(null);
+    setTtlMs(null);
     setMessage(null);
     setBusy(false);
   }
@@ -115,6 +136,12 @@ export default function SessionsPage() {
             <button className={neutralButton} disabled={busy} onClick={logout}>
               Cerrar sesión
             </button>
+            <div className="flex items-center gap-3 rounded-md border border-black/10 p-3 dark:border-white/10">
+              <span className="text-sm">TTL de la sesión:</span>
+              <span className="text-2xl font-semibold tabular-nums">
+                {ttlMs === null ? "—" : `${(ttlMs / 1000).toFixed(1)}s`}
+              </span>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
