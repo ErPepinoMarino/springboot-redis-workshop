@@ -23,7 +23,8 @@ Each module demonstrates a Redis pattern and ships its own API, its tests and it
 
 We show the speed difference when reading random products from a list, **with and without cache**.
 We fire a number of requests at different concurrency levels, set up several scenarios and compare
-the results.
+the results. A **warmup** is discarded and the **median of 3 rounds** is reported, so the numbers are
+stable instead of a single noisy pass.
 
 ### 2 — Rate limiting
 

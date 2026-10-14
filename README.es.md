@@ -23,7 +23,8 @@ Cada módulo demuestra un patrón de Redis y trae su propia API, sus tests y su 
 
 Demostramos la diferencia de velocidad al acceder a productos aleatorios de una lista, **con y sin
 caché**. Lanzamos un número de peticiones con distinta concurrencia, planteamos varios escenarios y
-comparamos los resultados.
+comparamos los resultados. Se descarta un **warmup** y se reporta la **mediana de 3 rondas**, para
+que los números sean estables y no una sola pasada ruidosa.
 
 ### 2 — Rate limiting
 

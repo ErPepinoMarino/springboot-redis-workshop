@@ -7,6 +7,7 @@ type BenchmarkResult = {
   mode: string;
   iterations: number;
   concurrency: number;
+  rounds: number;
   count: number;
   totalMs: number;
   avgMs: number;
@@ -183,8 +184,8 @@ export default function CachePage() {
         <section className="flex flex-col gap-3">
           <h2 className="text-center text-sm font-medium">
             TEST: con <strong>{(noCache ?? withCache)?.iterations.toLocaleString()}</strong>{" "}
-            peticiones y una concurrencia de <strong>{(noCache ?? withCache)?.concurrency}</strong>{" "}
-            — los resultados son:
+            peticiones y una concurrencia de <strong>{(noCache ?? withCache)?.concurrency}</strong> —
+            mediana de <strong>{(noCache ?? withCache)?.rounds}</strong> rondas:
           </h2>
 
           <div className="overflow-x-auto">
@@ -252,11 +253,13 @@ export default function CachePage() {
         </section>
       )}
       <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
-        ⚠️ <strong>Datos orientativos.</strong> Medimos consultas extremadamente sencillas (leer una
-        fila por su clave primaria) sobre 20 productos. No modelamos el llenado inicial de la caché
-        (los primeros accesos a cada producto son fallos) ni el coste de una consulta más pesada. En
-        un escenario real, con búsquedas complejas (joins, agregaciones, filtros), la ventaja de la
-        caché sería mayor. Toma estos números como ilustrativos, no como un benchmark riguroso.
+        ⚠️ <strong>Datos orientativos.</strong> Se descarta un <strong>warmup</strong> (para que la
+        JVM compile en caliente) y se reporta la <strong>mediana de 3 rondas</strong> (más estable
+        que una sola pasada, que oscila por el JIT, la contención del pool y el GC). Aun así, medimos
+        consultas extremadamente sencillas (leer una fila por su clave primaria) sobre 20 productos:
+        no modelamos el llenado inicial de la caché ni el coste de una consulta más pesada. En un
+        escenario real, con búsquedas complejas (joins, agregaciones, filtros), la ventaja de la caché
+        sería mayor. Toma estos números como ilustrativos, no como un benchmark riguroso.
       </footer>
     </div>
   );
