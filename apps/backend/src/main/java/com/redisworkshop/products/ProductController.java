@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 @RequestMapping("/cache/products")
@@ -40,6 +41,11 @@ public class ProductController {
         int safeIterations = Math.max(1, Math.min(iterations, 50000));
         int safeConcurrency = Math.max(1, Math.min(concurrency, 200));
         return benchmarkService.run(safeIterations, cached, safeConcurrency);
+    }
+    @GetMapping("/search")
+    public List<Product> search(@RequestParam String q,
+                                @RequestParam(defaultValue = "true") boolean cached) {
+        return cached ? service.search(q) : service.searchNoCache(q);
     }
     @DeleteMapping
     public ResponseEntity<Void> clear() {

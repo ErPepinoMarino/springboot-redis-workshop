@@ -31,7 +31,7 @@ class ProductControllerTest {
 
     @Test
     void productoInexistenteDevuelve404() throws Exception {
-        mockMvc.perform(get("/cache/products/9999"))
+        mockMvc.perform(get("/cache/products/999999"))
                 .andExpect(status().isNotFound());
     }
      @Test

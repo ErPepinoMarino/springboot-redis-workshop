@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.ToDoubleFunction;
 
 import org.springframework.stereotype.Service;
 
@@ -19,6 +18,10 @@ public class BenchmarkService {
     /** Rondas medidas; se reporta la MEDIANA (más robusta que una sola pasada ruidosa). */
     private static final int ROUNDS = 3;
 
+    /** Términos RECURRENTES: la misma búsqueda se repite → la caché acierta. */
+    private static final List<String> SEARCH_TERMS =
+            List.of("widget", "gadget", "gizmo", "doohickey", "thingamajig");
+
     private final ProductService productService;
 
     public BenchmarkService(ProductService productService) {
@@ -26,21 +29,15 @@ public class BenchmarkService {
     }
 
     public BenchmarkResult run(int iterations, boolean cached, int concurrency) {
-        List<Long> ids = productService.ids();
-        if (ids.isEmpty()) {
-            return new BenchmarkResult(cached ? "cache" : "nocache", iterations, concurrency, 0, 0, 0, 0,
-                    0, 0, 0, 0);
-        }
-
         ExecutorService pool = Executors.newFixedThreadPool(concurrency);
         try {
             // Warmup: calienta la JVM (JIT) y se descarta del cómputo.
-            drain(submit(pool, ids, Math.min(iterations, 100), cached));
+            drain(submit(pool, Math.min(iterations, 100), cached));
 
             List<BenchmarkResult> rounds = new ArrayList<>(ROUNDS);
             for (int r = 0; r < ROUNDS; r++) {
                 long wallStart = System.nanoTime();
-                List<Future<Long>> futures = submit(pool, ids, iterations, cached);
+                List<Future<Long>> futures = submit(pool, iterations, cached);
                 long wallNanos = System.nanoTime() - wallStart;
                 rounds.add(summarize(iterations, concurrency, cached, wallNanos, collect(futures)));
             }
@@ -54,7 +51,7 @@ public class BenchmarkService {
         }
     }
 
-    /** Mediana por métrica entre las rondas (reporta el resultado "típico", no un pico). */
+    /** Mediana por métrica entre las rondas (resultado "típico", no un pico). */
     private BenchmarkResult median(List<BenchmarkResult> rounds) {
         BenchmarkResult first = rounds.get(0);
         return new BenchmarkResult(
@@ -63,39 +60,37 @@ public class BenchmarkService {
                 first.concurrency(),
                 ROUNDS,
                 first.count(),
-                median(rounds, BenchmarkResult::totalMs),
-                median(rounds, BenchmarkResult::avgMs),
-                median(rounds, BenchmarkResult::minMs),
-                median(rounds, BenchmarkResult::maxMs),
-                median(rounds, BenchmarkResult::p95Ms),
-                median(rounds, BenchmarkResult::throughput));
+                median(rounds.stream().mapToDouble(r -> r.totalMs()).toArray()),
+                median(rounds.stream().mapToDouble(r -> r.avgMs()).toArray()),
+                median(rounds.stream().mapToDouble(r -> r.minMs()).toArray()),
+                median(rounds.stream().mapToDouble(r -> r.maxMs()).toArray()),
+                median(rounds.stream().mapToDouble(r -> r.p95Ms()).toArray()),
+                median(rounds.stream().mapToDouble(r -> r.throughput()).toArray()));
     }
 
-    private double median(List<BenchmarkResult> rounds, ToDoubleFunction<BenchmarkResult> metric) {
-        double[] values = rounds.stream().mapToDouble(metric).sorted().toArray();
-        int n = values.length;
-        return (n % 2 == 1) ? values[n / 2] : (values[n / 2 - 1] + values[n / 2]) / 2.0;
+    private double median(double[] values) {
+        double[] sorted = Arrays.copyOf(values, values.length);
+        Arrays.sort(sorted);
+        int n = sorted.length;
+        return (n % 2 == 1) ? sorted[n / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0;
     }
 
-    private List<Future<Long>> submit(ExecutorService pool, List<Long> ids, int times, boolean cached)
+    private List<Future<Long>> submit(ExecutorService pool, int times, boolean cached)
             throws InterruptedException {
         List<Callable<Long>> tasks = new ArrayList<>(times);
         for (int i = 0; i < times; i++) {
-            tasks.add(() -> timedRead(randomId(ids), cached));
+            tasks.add(() -> timedRead(cached));
         }
         return pool.invokeAll(tasks);
     }
 
-    private long randomId(List<Long> ids) {
-        return ids.get(ThreadLocalRandom.current().nextInt(ids.size()));
-    }
-
-    private long timedRead(long id, boolean cached) {
+    private long timedRead(boolean cached) {
+        String q = SEARCH_TERMS.get(ThreadLocalRandom.current().nextInt(SEARCH_TERMS.size()));
         long start = System.nanoTime();
         if (cached) {
-            productService.findById(id);
+            productService.search(q);
         } else {
-            productService.findByIdNoCache(id);
+            productService.searchNoCache(q);
         }
         return System.nanoTime() - start;
     }

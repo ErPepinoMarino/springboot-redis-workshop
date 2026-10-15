@@ -31,6 +31,41 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build: ./apps/backend
+    container_name: springboot-redis-workshop-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/redis_workshop
+      SPRING_DATASOURCE_USERNAME: redisworkshop
+      SPRING_DATASOURCE_PASSWORD: redisworkshop
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/healthz || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./apps/web
+      args:
+        BACKEND_URL: http://backend:8000
+    container_name: springboot-redis-workshop-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
 volumes:
   pgdata:
   redisdata:

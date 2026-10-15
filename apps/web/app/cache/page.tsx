@@ -18,9 +18,9 @@ type BenchmarkResult = {
 };
 
 const scenarios = [
-  { label: "Empate", iterations: 1, concurrency: 1 },
-  { label: "Redis gana", iterations: 1000, concurrency: 4 },
-  { label: "Redis arrasa", iterations: 20000, concurrency: 100 },
+  { label: "Ligero", iterations: 1000, concurrency: 8 },
+  { label: "Medio", iterations: 2000, concurrency: 20 },
+  { label: "Fuerte", iterations: 3000, concurrency: 30 },
 ];
 
 const greenButton = "btn btn-primary";
@@ -38,6 +38,7 @@ export default function CachePage() {
   const [noCache, setNoCache] = useState<BenchmarkResult | null>(null);
   const [withCache, setWithCache] = useState<BenchmarkResult | null>(null);
   const abort = useRef<AbortController | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function bench(cached: boolean): Promise<BenchmarkResult> {
     const controller = new AbortController();
@@ -57,6 +58,7 @@ export default function CachePage() {
   async function run() {
     if (running) return;
     setRunning(true);
+    setError(null);
     setNoCache(null);
     setWithCache(null);
 
@@ -74,8 +76,11 @@ export default function CachePage() {
 
       setNoCache(noCacheResult);
       setWithCache(withCacheResult);
-    } catch {
-      // cancelado
+    } catch (e) {
+      const aborted = e instanceof DOMException && e.name === "AbortError";
+      if (!aborted) {
+        setError("Error al contactar con el servidor. Inténtalo de nuevo.");
+      }
     } finally {
       setRunning(false);
     }
@@ -97,17 +102,25 @@ export default function CachePage() {
       <section className="flex flex-col items-center gap-2 text-center">
         <h1 className="font-display text-3xl tracking-wide text-cyan">Caché</h1>
         <p className="max-w-3xl text-sm text-dim">
-          Partimos de una base de datos con 20 productos. El test lanza N peticiones sobre{" "}
-          <strong>productos al azar</strong>, <strong>C a la vez</strong>, primero{" "}
-          <strong>sin caché</strong> y luego <strong>con caché</strong>. Como Postgres tiene un pool
-          de conexiones limitado, bajo concurrencia se encola; Redis no. Así se ve a partir de qué
-          carga la caché compensa.
+          Partimos de una base de datos con <strong>20.000 productos</strong>. El test lanza N{" "}
+          <strong>búsquedas recurrentes</strong> por nombre (<code>{"LIKE '%...%'"}</code>, que{" "}
+          <strong>escanea la tabla</strong>), <strong>C a la vez</strong>, primero{" "}
+          <strong>sin caché</strong> y luego <strong>con caché</strong>. Como la búsqueda es{" "}
+          <strong>costosa y se repite</strong>, la caché marca la diferencia.
         </p>
       </section>
-
+      {error && (
+        <p className="rounded-sm border border-red-500/40 bg-red-500/10 p-3 text-center text-sm text-red-400">
+          ⚠️ {error}
+        </p>
+      )}
       <section className="flex flex-col gap-3">
         <p className="text-center text-sm text-dim">
           Ejecuta uno de los tests por defecto o pon tus propios valores.
+        </p>
+        <p className="text-center text-xs text-dim">
+          ⚠️ Valores muy altos = muchas consultas costosas = <strong>timeout</strong>. Si el test
+          falla, baja las peticiones o la concurrencia.
         </p>
 
         <div className="flex flex-wrap items-start justify-center gap-3">
@@ -116,7 +129,7 @@ export default function CachePage() {
             <input
               type="number"
               min={1}
-              max={50000}
+              max={20000}
               value={iterations}
               disabled={running}
               onChange={(e) => {
@@ -125,7 +138,7 @@ export default function CachePage() {
               }}
               className={inputClass}
             />
-            <span className={hintClass}>(min. 1, max. 50000)</span>
+            <span className={hintClass}>(min. 1, max. 20000)</span>
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
@@ -133,7 +146,7 @@ export default function CachePage() {
             <input
               type="number"
               min={1}
-              max={200}
+              max={100}
               value={concurrency}
               disabled={running}
               onChange={(e) => {
@@ -142,7 +155,7 @@ export default function CachePage() {
               }}
               className={inputClass}
             />
-            <span className={hintClass}>(min. 1, max. 200)</span>
+            <span className={hintClass}>(min. 1, max. 100)</span>
           </label>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-6">
@@ -184,14 +197,14 @@ export default function CachePage() {
         <section className="flex flex-col gap-3">
           <h2 className="text-center text-sm font-medium">
             TEST: con <strong>{(noCache ?? withCache)?.iterations.toLocaleString()}</strong>{" "}
-            peticiones y una concurrencia de <strong>{(noCache ?? withCache)?.concurrency}</strong> —
-            mediana de <strong>{(noCache ?? withCache)?.rounds}</strong> rondas:
+            peticiones y una concurrencia de <strong>{(noCache ?? withCache)?.concurrency}</strong>{" "}
+            — mediana de <strong>{(noCache ?? withCache)?.rounds}</strong> rondas:
           </h2>
 
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-line text-left border-line">
+                <tr className="border-b border-line text-left">
                   <th className="py-2 pr-4 font-medium">Métrica</th>
                   <th className="py-2 pr-4 font-medium">Sin caché</th>
                   <th className="py-2 pr-4 font-medium">Con caché</th>
@@ -208,7 +221,7 @@ export default function CachePage() {
                     ["Completadas", (r: BenchmarkResult) => `${r.count}/${r.iterations}`],
                   ] as const
                 ).map(([label, fn]) => (
-                  <tr key={label} className="border-b border-line/40 border-line/40">
+                  <tr key={label} className="border-b border-line/40">
                     <td className="py-2 pr-4 text-dim">{label}</td>
                     <td className="py-2 pr-4">{noCache ? fn(noCache) : "—"}</td>
                     <td className="py-2 pr-4">{withCache ? fn(withCache) : "—"}</td>
@@ -253,13 +266,12 @@ export default function CachePage() {
         </section>
       )}
       <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
-        ⚠️ <strong>Datos orientativos.</strong> Se descarta un <strong>warmup</strong> (para que la
-        JVM compile en caliente) y se reporta la <strong>mediana de 3 rondas</strong> (más estable
-        que una sola pasada, que oscila por el JIT, la contención del pool y el GC). Aun así, medimos
-        consultas extremadamente sencillas (leer una fila por su clave primaria) sobre 20 productos:
-        no modelamos el llenado inicial de la caché ni el coste de una consulta más pesada. En un
-        escenario real, con búsquedas complejas (joins, agregaciones, filtros), la ventaja de la caché
-        sería mayor. Toma estos números como ilustrativos, no como un benchmark riguroso.
+        ⚠️ <strong>Metodología.</strong> Se descarta un <strong>warmup</strong> (para que la JVM
+        compile en caliente) y se reporta la <strong>mediana de 3 rondas</strong>. Medimos una{" "}
+        <strong>búsqueda por subcadena</strong> (<code>{"LIKE '%...%'"}</code>) sobre 20.000 filas:
+        al no poder usar índice, Postgres <strong>escanea</strong> la tabla. Es una consulta{" "}
+        <strong>real y recurrente</strong> (un catálogo que se busca muchas veces) — justo lo que
+        una caché debe acelerar. Aun así, tómalo como ilustrativo, no como un benchmark riguroso.
       </footer>
     </div>
   );

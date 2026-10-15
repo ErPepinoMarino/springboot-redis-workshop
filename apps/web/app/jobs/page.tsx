@@ -243,10 +243,11 @@ export default function JobsPage() {
       </section>
 
       <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
-        ⚠️ El estado se refresca con <strong>polling</strong> cada 0.5s. En el{" "}
-        <strong>Módulo 6</strong> lo cambiaremos por <strong>SSE</strong> para recibir cada cambio
-        al instante. La tarea «caída» no hace <code>XACK</code>: queda pendiente y el reclaimer la
-        reencola (la verás <em>reintentar</em> y terminar <strong>tras rescate</strong>).
+        ⚠️ El estado se refresca con <strong>polling</strong> cada 0.5s. (El{" "}
+        <strong>Módulo 6</strong> demostró <strong>SSE</strong> en otros endpoints; aquí mantenemos
+        el polling por simplicidad.) La tarea «caída» no hace <code>XACK</code>: queda pendiente y
+        el reclaimer la reencola (la verás <em>reintentar</em> y terminar{" "}
+        <strong>tras rescate</strong>).
       </footer>
     </div>
   );

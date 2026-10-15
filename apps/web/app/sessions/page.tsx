@@ -224,8 +224,8 @@ export default function SessionsPage() {
       <footer className="mt-2 rounded-sm border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-dim">
         ⚠️ El bloqueo del botón es solo <strong>UX</strong>; el servidor <strong>siempre</strong>{" "}
         verifica (401/403) en cada clic. Credenciales de ejemplo: <code>user/user</code> y{" "}
-        <code>admin/admin</code>. El <strong>contador regresivo SSE</strong> del TTL llegará en el
-        Módulo 6.
+        <code>admin/admin</code>. El <strong>TTL</strong> de la sesión se muestra en vivo vía{" "}
+        <strong>SSE</strong> y caduca solo.
       </footer>
     </div>
   );
